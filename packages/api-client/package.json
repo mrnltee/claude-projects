@@ -1,0 +1,13 @@
+{
+  "name": "@claude-projects/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

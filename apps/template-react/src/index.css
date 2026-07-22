@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark light;
+  --color-primary: #0f172a;
+  --color-on-primary: #ffffff;
+  --color-secondary: #1e293b;
+  --color-accent: #22c55e;
+  --color-on-accent: #0f172a;
+  --color-background: #020617;
+  --color-foreground: #f8fafc;
+  --color-muted: #1a1e2f;
+  --color-border: #334155;
+  --color-destructive: #ef4444;
+  --color-ring: #22c55e;
+}
+
+/* Dark is the designed default; this is a fallback for users whose OS
+   prefers light, since the design system has no light variant of this palette. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-primary: #0f172a;
+    --color-on-primary: #ffffff;
+    --color-secondary: #1e293b;
+    --color-accent: #22c55e;
+    --color-on-accent: #0f172a;
+    --color-background: #ffffff;
+    --color-foreground: #0f172a;
+    --color-muted: #f1f5f9;
+    --color-border: #e2e8f0;
+    --color-destructive: #dc2626;
+    --color-ring: #22c55e;
+  }
+}

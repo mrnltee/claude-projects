@@ -1,0 +1,11 @@
+{
+  "name": "claude-projects",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:template": "npm run dev -w apps/template-react"
+  }
+}
