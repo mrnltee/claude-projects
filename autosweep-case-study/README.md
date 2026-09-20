@@ -20,4 +20,7 @@ Heuristic UX audit and proposed redesign of the Autosweep RFID mobile app
 ## Status
 
 - Audit: complete (v2, includes reload flow)
-- Redesign in Figma: colour tokens + `01 Home` built; remaining screens in progress
+- Redesign in Figma (page "Propose Solutions"): colour tokens + 9 of 16 screens built
+  - Done: 01 Home · 02 Home (low balance) · 03 Activity · 04 Transaction detail ·
+    05 Reload amount · 06 Payment method · 07 Review · 08 Bank sign-in · 09 Reload complete
+  - Queued: 10 Traffic · 11 Help · 12 Vehicle · 13 Add vehicle · 14 Menu · 15 States · 16 Web
