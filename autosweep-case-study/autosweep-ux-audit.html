@@ -1,0 +1,977 @@
+<title>Autosweep UX Audit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F5F7F4; --surface:#FFFFFF; --surface-2:#EDF1EC; --ink:#17211B; --ink-2:#4F5E54; --ink-3:#7A877E;
+  --line:#D6DDD6; --accent:#1F8F3F; --accent-ink:#146A2E; --accent-soft:#E1F0E5;
+  --crit:#B3261E; --crit-soft:#FBE7E5; --high:#C8641A; --high-soft:#FCEBDD; --med:#9A7B0C; --med-soft:#FBF3D6; --low:#3E6E9E; --low-soft:#E3ECF5;
+  --code-bg:#EEF2EE; --shadow:0 1px 2px rgba(23,33,27,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111613; --surface:#181F1A; --surface-2:#1F2822; --ink:#E8EDE8; --ink-2:#B4BFB6; --ink-3:#7F8C82;
+    --line:#2C3830; --accent:#4CB56B; --accent-ink:#7DD397; --accent-soft:#1B3323;
+    --crit:#F28B84; --crit-soft:#3A1C1A; --high:#F0A05A; --high-soft:#3B2716; --med:#E0C25A; --med-soft:#36300F; --low:#8DB6E0; --low-soft:#172735;
+    --code-bg:#1F2822; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#181F1A; --surface-2:#1F2822; --ink:#E8EDE8; --ink-2:#B4BFB6; --ink-3:#7F8C82;
+  --line:#2C3830; --accent:#4CB56B; --accent-ink:#7DD397; --accent-soft:#1B3323;
+  --crit:#F28B84; --crit-soft:#3A1C1A; --high:#F0A05A; --high-soft:#3B2716; --med:#E0C25A; --med-soft:#36300F; --low:#8DB6E0; --low-soft:#172735;
+  --code-bg:#1F2822; --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:860px;margin:0 auto}
+h1,h2,h3,h4{font-family:"Overpass","Helvetica Neue",Arial,sans-serif;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.6rem;font-weight:700;margin-top:3.5rem;padding-top:1.25rem;border-top:3px solid var(--accent);scroll-margin-top:16px}
+h3{font-size:1.15rem;font-weight:700;margin-top:2rem}
+h4{font-size:1rem;font-weight:700;margin-top:1.25rem}
+p{margin:.75rem 0;max-width:68ch}
+ul,ol{padding-left:1.25rem;max-width:72ch}
+li{margin:.3rem 0}
+li::marker{color:var(--accent)}
+a{color:var(--accent-ink)}
+code,.ref{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:.85em;background:var(--code-bg);padding:.1em .4em;border-radius:4px;white-space:nowrap}
+.eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);font-weight:600}
+header{padding-block:3rem 2rem;border-bottom:1px solid var(--line)}
+header .meta{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;color:var(--ink-2);font-size:.9rem;margin-top:1rem}
+header .meta b{color:var(--ink);font-weight:600}
+.lede{font-size:1.15rem;color:var(--ink-2);max-width:62ch}
+nav.toc{display:flex;flex-wrap:wrap;gap:.4rem;margin:1.5rem 0 0}
+nav.toc a{font-size:.8rem;text-decoration:none;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:.25rem .7rem;background:var(--surface)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--accent);color:var(--accent-ink);outline:none}
+.pill{display:inline-block;font-family:"Overpass",sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:.15rem .55rem;border-radius:4px;line-height:1.5;vertical-align:middle;white-space:nowrap}
+.pill.crit{background:var(--crit-soft);color:var(--crit)}
+.pill.high{background:var(--high-soft);color:var(--high)}
+.pill.med{background:var(--med-soft);color:var(--med)}
+.pill.low{background:var(--low-soft);color:var(--low)}
+.pill.qw{background:var(--accent-soft);color:var(--accent-ink)}
+.pill.strat{background:var(--low-soft);color:var(--low)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin:1.5rem 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.9rem 1rem;box-shadow:var(--shadow)}
+.stat .n{font-family:"Overpass",sans-serif;font-size:2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.stat .l{font-size:.8rem;color:var(--ink-2);margin-top:.35rem}
+.stat.crit .n{color:var(--crit)}.stat.high .n{color:var(--high)}.stat.med .n{color:var(--med)}.stat.low .n{color:var(--low)}
+.callout{background:var(--accent-soft);border-left:4px solid var(--accent);padding:.9rem 1.1rem;border-radius:0 8px 8px 0;margin:1.25rem 0}
+.callout p{margin:.35rem 0}
+.assume{background:var(--surface-2);border-left:4px solid var(--ink-3);padding:.75rem 1rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.95rem}
+.assume b{color:var(--ink-2)}
+.tablewrap{overflow-x:auto;margin:1.25rem 0;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:.65rem .8rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:"Overpass",sans-serif;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);background:var(--surface-2);font-weight:700}
+tr:last-child td{border-bottom:none}
+td.num{font-variant-numeric:tabular-nums;color:var(--ink-2);white-space:nowrap}
+/* journeys */
+.journey{display:grid;grid-template-columns:1fr;gap:.75rem;margin:1rem 0}
+.jcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.9rem 1.1rem}
+.jcard h4{margin:0 0 .3rem}
+.jcard .path{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--ink-2);margin:.35rem 0}
+.jcard .path span{color:var(--accent-ink)}
+.jcard p{font-size:.92rem;margin:.35rem 0}
+/* screen audit */
+.screen{border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:1.25rem 0;overflow:hidden}
+.screen .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.5rem 1rem;padding:.8rem 1.1rem;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.screen .head h3{margin:0;font-size:1.05rem}
+.screen .head .ref{background:var(--surface);border:1px solid var(--line)}
+.screen .body{padding:.5rem 1.1rem 1rem}
+.screen .body p.obs{color:var(--ink-2);font-size:.92rem}
+.screen ul{margin:.4rem 0}
+.screen li{font-size:.95rem}
+.works{color:var(--accent-ink);font-size:.9rem;margin-top:.6rem}
+.works::before{content:"Works well · ";font-weight:600}
+/* findings */
+.finding{border:1px solid var(--line);border-left-width:5px;border-radius:8px;background:var(--surface);padding:1rem 1.2rem;margin:1.25rem 0;scroll-margin-top:16px}
+.finding.crit{border-left-color:var(--crit)}.finding.high{border-left-color:var(--high)}.finding.med{border-left-color:var(--med)}.finding.low{border-left-color:var(--low)}
+.finding .top{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;margin-bottom:.5rem}
+.finding .top h3{margin:0;font-size:1.1rem}
+.finding .id{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--ink-3)}
+.finding dl{display:grid;grid-template-columns:130px 1fr;gap:.35rem 1rem;margin:.5rem 0 0;font-size:.95rem}
+.finding dt{font-family:"Overpass",sans-serif;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:700;padding-top:.2rem}
+.finding dd{margin:0}
+.finding dd p{margin:.25rem 0;max-width:none}
+@media (max-width:560px){.finding dl{grid-template-columns:1fr}.finding dt{padding-top:.5rem}}
+/* solutions */
+.sol{margin:1rem 0;padding:0 0 0 1rem;border-left:2px solid var(--line)}
+.sol h4{margin-top:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.9rem;margin:1rem 0}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.9rem 1.1rem}
+.tile h4{margin:0 0 .35rem;font-size:1rem}
+.tile p{font-size:.92rem;margin:.3rem 0;max-width:none}
+.tile .why{color:var(--ink-2);font-size:.85rem}
+footer{margin-top:4rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--ink-3);font-size:.85rem}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Product design case study · UX audit</div>
+  <h1>Autosweep Companion App — UX Audit</h1>
+  <p class="lede">A heuristic review of the current Autosweep RFID mobile app (iOS, v4.0.0.1) for San Miguel Infrastructure's 1M+ toll customers, based on 41 captured screens covering 17 distinct surfaces, including the full reload flow.</p>
+  <div class="meta">
+    <span><b>Evidence</b> 31 screenshots (IMG_8041–8071) + 10 reload-flow screens (R1–R10), single authenticated account, one vehicle</span>
+    <span><b>Method</b> Expert heuristic review + journey inference</span>
+    <span><b>Date</b> September 2026</span>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#summary">Executive summary</a>
+    <a href="#goals">Goals &amp; journeys</a>
+    <a href="#screens">Screen-by-screen</a>
+    <a href="#pain">Pain points</a>
+    <a href="#priority">Prioritized list</a>
+    <a href="#solutions">Design solutions</a>
+    <a href="#missing">Missing features</a>
+    <a href="#quick">Quick wins</a>
+    <a href="#long">Longer-term</a>
+    <a href="#research">Research questions</a>
+    <a href="#next">Next steps</a>
+  </nav>
+</header>
+
+<!-- ============================================================ -->
+<h2 id="summary">Executive summary</h2>
+<p>The Autosweep app is structurally a thin wrapper around a small set of back-office functions — look up an account, generate a statement, hand off to a payment provider, send a support message. It is not yet built around the questions a toll customer actually has on the road: <em>Do I have enough load to get through the next gantry? Did that charge look right? How do I top up in the next 30 seconds?</em></p>
+<p>The single most consequential finding is that the <strong>account balance — the one number every user opens the app for — is not shown on Home.</strong> It sits one tap deep on a screen titled "Account," beneath the same visual weight as a "Delete Account" button. Two of the four primary navigation tabs are effectively non-functional: <strong>Toll Calculator is disabled</strong> (it opens a "Feature Disabled" alert), and <strong>Traffic Updates is an embedded corporate website</strong> that loads blank, then shows a spinner, then blocks the map with a 2018 privacy-consent modal. A third destination in the Menu, <strong>Announcement, renders empty</strong>.</p>
+<p>The app also has no visible <strong>transaction history</strong>. The only route to "what was I charged?" is a Statement of Account generator that requires six dropdown selections and whose output is never shown in-app. Trust-critical flows — reload, dispute a charge, report an unreadable sticker — exist but are buried, jargon-laden, or hand off to a third party without confirmation.</p>
+<p>The reload flow itself (screens R1–R10) is more complete than the method picker suggests: it names real providers (BPI, RCBC, UnionBank, GCash, GrabPay, Maya), shows a clear payment summary and discloses the fee before charging. But it introduces its own trust problems — <strong>bank credentials are entered inside an Autosweep-branded webview</strong>, a <strong>₱13 convenience fee (6.5% on a ₱200 load) is revealed only at the final summary</strong>, full card details are typed into what looks like a native form, and the GCash handoff renders a blank QR panel with no captured return or receipt state.</p>
+
+<div class="stats" aria-label="Finding counts by severity">
+  <div class="stat crit"><div class="n">4</div><div class="l">Critical findings</div></div>
+  <div class="stat high"><div class="n">10</div><div class="l">High findings</div></div>
+  <div class="stat med"><div class="n">12</div><div class="l">Medium findings</div></div>
+  <div class="stat low"><div class="n">6</div><div class="l">Low findings</div></div>
+</div>
+
+<div class="callout">
+  <p><strong>Headline recommendation.</strong> Rebuild Home around balance, sticker status and the last few transactions; make "Reload" a one-tap primary action; retire or hide the two dead tabs until they work natively; replace the SOA generator with an in-app transaction list. These four moves address roughly 70% of the friction identified below and are all achievable without changing the underlying account model.</p>
+</div>
+
+<h3>What works</h3>
+<ul>
+  <li>Strong, consistent brand green; the header + card language is recognizable and calm.</li>
+  <li>Customer Care exposes per-tollway hotlines and a structured concern form — the right ingredients, if not the right presentation.</li>
+  <li>Multi-account support ("My Accounts", "+ Add") anticipates households and fleets.</li>
+  <li>Password fields have Show toggles; legal documents are readable in-app rather than external PDFs.</li>
+  <li>The Payment Summary (R4, R9) is the best-designed screen in the app: itemised amount, fee and total, one clear primary action, a quiet "Go Back."</li>
+  <li>Six real payment channels across banks and wallets, each with its logo — broader coverage than most local utility apps.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="goals">Observed user goals and primary journeys</h2>
+<p>Goals are inferred from what the screens make possible and from the concern categories the app itself lists in Customer Care (Incorrect Charging, Uncredited Load, Unreadable Sticker, Lost Card, Request for SOA). Those categories are the company's own record of why customers contact them — a useful proxy for top jobs-to-be-done.</p>
+
+<div class="journey">
+  <div class="jcard">
+    <h4>J1 · "Do I have enough load?" (highest frequency)</h4>
+    <div class="path">Splash → Home → <span>Balance</span> → Account screen (₱128.00)</div>
+    <p>Three screens and two taps to see one number. No low-balance warning, no minimum-balance guidance, no "enough for your usual trip?" context.</p>
+  </div>
+  <div class="jcard">
+    <h4>J2 · "Top up before I hit the gantry" (high frequency, high urgency)</h4>
+    <div class="path">Home → Balance → Account → <span>method</span> → amount + provider → Payment Summary (fee shown) → <span>bank login webview / GCash handoff</span> → (return &amp; receipt not captured)</div>
+    <p>Seven screens from Home to the point of paying. Reload is a secondary section on the Account screen, below Delete Account; the amount is typed before a provider is chosen and the fee appears only at the summary.</p>
+  </div>
+  <div class="jcard">
+    <h4>J3 · "Was that charge correct?" (medium frequency, high trust impact)</h4>
+    <div class="path">Home → SOA → <span>6 dropdowns</span> → Generate → (output not captured) &nbsp;|&nbsp; or Menu → Customer Care → Incorrect Charging</div>
+    <p>No transaction list exists. Users must guess a date range and generate a statement to see individual tolls.</p>
+  </div>
+  <div class="jcard">
+    <h4>J4 · "Something's wrong — get help" (low frequency, very high impact)</h4>
+    <div class="path">Menu → Customer Care → <span>pick hotline</span> or Message Us (Account → Concern → Message → Send)</div>
+    <p>Functional, but numbers are hidden behind identical icons, and there is no ticket status after sending.</p>
+  </div>
+  <div class="jcard">
+    <h4>J5 · "Add my second car / family member's tag" (one-time)</h4>
+    <div class="path">Home → + Add → <span>Account Number + Plate/Card Number + Alias</span> → Add Account</div>
+    <p>Requires the 7-digit account number from the physical card or SOA; no scan, lookup, or "where do I find this?" help.</p>
+  </div>
+  <div class="jcard">
+    <h4>J6 · "Check traffic before I leave" (situational)</h4>
+    <div class="path">Traffic Updates tab → blank → spinner → <span>privacy modal</span> → web map</div>
+    <p>Reachable in principle; in practice blocked by a consent modal for a 2018 policy on every visit observed.</p>
+  </div>
+</div>
+
+<div class="assume"><b>Assumption.</b> Frequency and urgency rankings are inferred from the domain (prepaid toll RFID) and from the app's own concern taxonomy, not from analytics. Validate with usage data and support-ticket volumes — see <a href="#research">Research questions</a>.</div>
+
+<!-- ============================================================ -->
+<h2 id="screens">Screen-by-screen UX audit</h2>
+<p>Screens are grouped by surface. References use the capture number (e.g. <span class="ref">8042</span>) or, for the reload flow added in the second batch, <span class="ref">R1</span>–<span class="ref">R10</span> in the order supplied: R1 Credit Card · R2 Add Credit Card · R3 Direct Debit · R4 Direct Debit summary · R5 Loading · R6–R7 BPI login · R8 E-Wallet · R9 E-Wallet summary · R10 GCash handoff.</p>
+
+<div class="screen">
+  <div class="head"><h3>Splash</h3><span class="ref">8041</span></div>
+  <div class="body">
+    <p class="obs">Full-bleed green, logo, determinate-looking progress bar, "Checking connection…"</p>
+    <ul>
+      <li>The bar reads as determinate but the step is a network check — a user on a weak signal (2 bars in the capture) has no idea whether to wait or retry. No offline state was captured.</li>
+      <li>"Checking connection…" is system-centred copy; users don't need to know the step, they need to know the app is opening.</li>
+    </ul>
+    <p class="works">Brand-forward, no clutter, fast path into the app.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Home</h3><span class="ref">8042</span> <span class="ref">8049</span></div>
+  <div class="body">
+    <p class="obs">"Welcome back, AUTOSWEEP TO GO" · My Accounts · one card labelled MAIN ACCOUNT with account no. 3631685, plate D109224, and three shortcuts (Vehicles, SOA, Balance) · "+ Add" · bottom tabs Home / Toll Calculator (greyed) / Traffic Updates / Menu.</p>
+    <ul>
+      <li><strong>No balance on Home.</strong> The screen's primary real estate is a greeting and an account number; roughly 60% of the viewport is empty.</li>
+      <li>The greeting shows <code>AUTOSWEEP TO GO</code> where a person's name is expected. Either the registered name field holds a placeholder, or the greeting is bound to the wrong field. Either way it undermines the "welcome back" intent.</li>
+      <li>Card hierarchy leads with the account number (green, large) over the plate. Customers recognise plates; account numbers are a back-office key.</li>
+      <li>"SOA" is an unexplained acronym on the most-used screen. "MAIN ACCOUNT" is a label with no contrast when there is only one account.</li>
+      <li>The Toll Calculator tab is rendered disabled but remains tappable; tapping it (<span class="ref">8049</span>) shows a native alert "Feature Disabled — Toll Calculator is currently disabled." A dead primary tab teaches users the nav can't be trusted.</li>
+      <li>No recent activity, no sticker status, no notifications entry point.</li>
+    </ul>
+    <p class="works">Account card with shortcuts is a sound pattern to build on; "+ Add" is discoverable.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Vehicle Info</h3><span class="ref">8043</span></div>
+  <div class="body">
+    <p class="obs">Account number heading · "LIST OF VEHICLES" · one card: plate D109224, tag 5154171221, Color N/A, Make &amp; Model (blank).</p>
+    <ul>
+      <li>Half the card is empty or "N/A". Rendering blank fields signals incomplete data without offering a way to complete it.</li>
+      <li>The card looks tappable (icon, card chrome) but no detail or action is evident. No sticker status (active / blocked / for replacement), no "report unreadable sticker" shortcut despite that being a listed support concern.</li>
+      <li>Navigation switches from the tab bar to a single centered "Back" pill in the footer — the tab bar disappears on every child screen, so users lose their place in the app.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Generate SOA</h3><span class="ref">8044</span> <span class="ref">8046</span> <span class="ref">8047</span> <span class="ref">8048</span></div>
+  <div class="body">
+    <p class="obs">"Generate From" and "Generate To", each built from three dropdowns (Month / Day / Year). Defaults: From = To = today. "To" Month and Year are disabled. Dropdown-open states captured for Month, Year and Day.</p>
+    <ul>
+      <li><strong>Six dropdowns to pick a date range</strong> where a native range picker or presets ("This month", "Last 30 days", "Last billing period") would take one tap.</li>
+      <li>Default range is today-to-today — the least useful range possible. A user who taps Generate immediately gets an empty statement.</li>
+      <li>"To" Month and Year are disabled with no explanation. Users cannot tell whether the range is capped to one month by policy or by bug.</li>
+      <li>Open dropdown lists float over the Generate button and past the Back control (<span class="ref">8048</span>); the Year list shows 2021–2026 with no scroll affordance; month abbreviations are inconsistent ("Sept" in From, "Sep" in To).</li>
+      <li>Inputs sit inside a dashed outer border with a solid inner border — a double frame that reads as a drop-zone or a disabled state, not an input. Focus is indicated with an orange dashed ring, a colour otherwise used for the Cancel button.</li>
+      <li>The statement output was not captured; it is unclear whether users see it in-app, download a PDF, or receive an email. That uncertainty is itself a design problem — nothing on the form sets the expectation.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Account (Balance &amp; Reload)</h3><span class="ref">8045</span></div>
+  <div class="body">
+    <p class="obs">CURRENT BALANCE ₱128.00 · ACCOUNT | PLATE 3631685 | D109224 · VEHICLE ALIAS Not Set · two circular actions: Update Alias, Delete Account · "Reload Your Account": Credit Cards, Direct Debit, E-Wallet · "Powered by Xendit Philippines".</p>
+    <ul>
+      <li><strong>Delete Account has identical visual weight to Update Alias</strong> and sits directly above the reload options. A destructive action has no colour, position or friction signal. (Confirmation dialog not captured — validate.)</li>
+      <li>Reload — the primary action for a prepaid product — is a headed section of three equal cards, not a primary button. No amount presets, no last-used method, no minimum/maximum guidance.</li>
+      <li>"E-Wallet — Connect a digital wallet for easy transactions" describes linking, not paying; "Direct Debit" is a banking term most consumers read as "the bank takes money automatically." Copy should describe the customer's action ("Pay with GCash / Maya", "Pay from my bank").</li>
+      <li>Screen title "Account" doesn't match the Home shortcut "Balance" that leads here.</li>
+      <li>The Xendit attribution is fine for trust; the handoff itself is audited below under R1–R10.</li>
+    </ul>
+    <p class="works">Balance is large and legible; the three reload options are clearly distinguished with icons.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Reload · Credit Card</h3><span class="ref">R1</span> <span class="ref">R2</span></div>
+  <div class="body">
+    <p class="obs">R1: "Enter Reload Amount" field · "Your Credit Cards" list with one masked Mastercard and a red trash icon · a floating green "+" far below · "Powered by Xendit" · Back. R2 "Add Credit Card": Card Number, Expiry Month/Year dropdowns, CVV, First Name, Last Name, Email Address, Mobile Number, Save Card.</p>
+    <ul>
+      <li><strong>No visible "Pay" action on R1.</strong> The user presumably taps the card row, but nothing signals that; the only buttons are delete (red, prominent) and add. The primary path is invisible while the destructive one is loud.</li>
+      <li>Amount is requested before a card is chosen, with no currency prefix, presets, or min/max — and it is re-entered on every method screen if the user changes their mind (R1, R3, R8 each have their own amount field).</li>
+      <li>R2 collects the full PAN, expiry and CVV in what looks like a native Autosweep form with the app's dashed inputs. Whether this is a Xendit tokenisation component or the app's own form is not visible to the user — and that is the problem: there is no lock icon, no "your card details go directly to Xendit" line, no card-brand detection or number formatting, no scan-card option.</li>
+      <li>Email and mobile are requested again even though the account already has them.</li>
+      <li>Expiry uses two dropdowns instead of a single MM/YY field.</li>
+    </ul>
+    <p class="works">Saved-card list with brand logo and masking is the right model.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Reload · Direct Debit</h3><span class="ref">R3</span> <span class="ref">R4</span> <span class="ref">R5</span> <span class="ref">R6</span> <span class="ref">R7</span></div>
+  <div class="body">
+    <p class="obs">R3: amount field · "Choose Bank": BPI, RCBC, UnionBank cards with logos. R4 "Payment Summary": illustration · RFID Account Number, Payment Method, Bank, Reload Amount ₱200.00, Convenience Fee ₱13.00, Total ₱213.00 · "Proceed to Payment" · "Go Back". R5: full-screen "Loading…" spinner. R6–R7: an embedded BPI "Login to your account — You need to login to link with XENDIT" page with Username, Password, an authorisation notice and a red BPI "Login" button, inside the Autosweep header and Back pill.</p>
+    <ul>
+      <li><strong>Bank credentials are typed inside the Autosweep app chrome.</strong> The BPI page is a webview under a green "Direct Debit" header with no URL bar, no padlock, no way to verify the domain. This is exactly the pattern banks tell customers to refuse. Even if the page is genuinely BPI-hosted, the presentation is indistinguishable from phishing.</li>
+      <li>The copy says "link your BPI Online Banking account to XENDIT" — a third-party name the user met once in a footer. It reads as authorising a standing link, not paying ₱213 once.</li>
+      <li>The <strong>₱13 fee appears for the first time on the summary</strong>, after amount and bank are chosen. On a ₱200 load that is 6.5%. Neither the Account screen nor the method screens mention a fee.</li>
+      <li>Provider descriptions vary without meaning: "Pay instantly with your BPI Account" / "Use your RCBC balance for payment" / "Pay securely via your UnionBank account." Three phrasings imply three behaviours; there is one.</li>
+      <li>R5's loading state occupies the whole screen with no context ("Connecting to BPI…") and the Back pill remains live mid-transaction.</li>
+      <li>The illustration on R4 takes a third of the viewport and pushes the numbers below the fold on smaller devices.</li>
+    </ul>
+    <p class="works">Summary is itemised, total is emphasised, "Go Back" is correctly de-emphasised; branded spinner (vs. the Traffic tab).</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Reload · E-Wallet</h3><span class="ref">R8</span> <span class="ref">R9</span> <span class="ref">R10</span></div>
+  <div class="body">
+    <p class="obs">R8: amount field · "Choose E-Wallet": GCash, GrabPay, Maya. R9: Payment Summary identical to R4 with Provider "GCASH", fee ₱13.00, total ₱213.00. R10: GCash-branded panel "Securely complete the payment with your GCash app" · "Open in GCash" · "or Log in to GCash and scan this QR with the QR Scanner" · large empty white area · Autosweep Back pill.</p>
+    <ul>
+      <li><strong>The QR panel is blank.</strong> Either it failed to render or it is still loading — either way the fallback instruction points at nothing. A user on the same phone cannot scan their own screen anyway; the QR path is only useful on a second device and should say so.</li>
+      <li>After "Open in GCash," the return to Autosweep, the success/failure state and any receipt are not captured. Given "Uncredited Load" is a named support category, this return leg is the highest-risk unobserved step in the app.</li>
+      <li>Provider is rendered "GCASH" on R9 but "GCash" everywhere else.</li>
+      <li>Same fee (₱13) as Direct Debit with no explanation of whether it is flat or per-method.</li>
+    </ul>
+    <p class="works">Deep-link "Open in GCash" is the right primary path; wallet logos are recognisable.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Traffic Updates</h3><span class="ref">8050</span> <span class="ref">8052</span> <span class="ref">8053</span> <span class="ref">8054</span> <span class="ref">8055</span></div>
+  <div class="body">
+    <p class="obs">Tab opens to a blank white page → a four-dot loader in non-brand colours → an embedded SMC Tollways website with a "We have an updated Privacy Statement" modal (pre-checked consent box, "I AGREE") overlaying a traffic map with feed timestamps ("STAR: 34 minutes ago", "TPLEX: 2 minutes ago") → tapping the link navigates the whole tab to a Privacy Statement page dated 15 June 2018, complete with the website's own hamburger menu.</p>
+    <ul>
+      <li><strong>This is a webview of a desktop website, not a feature.</strong> It has its own navigation, its own typography (Ubuntu), its own consent flow, and no way back once the user follows a link.</li>
+      <li>A consent modal for a policy last updated in 2018 interrupts every visit observed. The checkbox is pre-ticked, which is both a dark pattern and likely non-compliant with informed-consent norms under the Data Privacy Act.</li>
+      <li>Three distinct loading states (blank, spinner, content) with no skeleton or message; the spinner's red/blue/purple palette is off-brand and looks like an error.</li>
+      <li>The underlying content — per-tollway feed freshness — is valuable and worth surfacing natively.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Menu</h3><span class="ref">8051</span> <span class="ref">8056</span></div>
+  <div class="body">
+    <p class="obs">AUTOSWEEP TO GO · email · View Annoucement · Change Password · Customer Care · Legal Notice · "Autosweep App Version 4.0.0.1" · Logout.</p>
+    <ul>
+      <li>Typo: "Annoucement". Label drift: "Change Password" opens "Update Password"; "Legal Notice" opens "Legal Notices".</li>
+      <li>No profile editing, no notification preferences, no biometric/PIN setting, no language, no FAQ. The Menu is where users expect to manage themselves; here it manages almost nothing.</li>
+      <li>The eye icon for Announcement is a "visibility" metaphor, not a "news" one.</li>
+    </ul>
+    <p class="works">Logout is clearly separated and appropriately coloured; version number is present for support.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Announcement</h3><span class="ref">8057</span></div>
+  <div class="body">
+    <p class="obs">Title bar, blank white body, Back.</p>
+    <ul>
+      <li>Completely empty — no loading indicator, no "No announcements right now", no error. The user cannot distinguish "nothing to say" from "broken."</li>
+    </ul>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Update Password</h3><span class="ref">8058</span></div>
+  <div class="body">
+    <p class="obs">Current / New / Retype password with Show toggles; full-width CTA.</p>
+    <ul>
+      <li>No password rules shown up front; no strength indicator; no "forgot current password" path from here.</li>
+      <li>Same dashed double-border input treatment as elsewhere.</li>
+    </ul>
+    <p class="works">Straightforward, Show toggles present, labels above fields.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Customer Care</h3><span class="ref">8059</span>–<span class="ref">8065</span></div>
+  <div class="body">
+    <p class="obs">"Need Help?" · five identical green circles (Autosweep, Skyway, SLEX, TPLEX, STAR) that open a native call sheet with a number · "Message Us" form: Account Number dropdown ("Not Applicable" / 3631685), Type of Concern dropdown (10+ items), Message textarea · orange Cancel + green Send Message.</p>
+    <ul>
+      <li>Hotline numbers are hidden until tapped; users can't copy, save, or compare them. No operating hours. Two of the five buttons share the car icon and two share the bus icon, so the icons carry no meaning.</li>
+      <li>"Not Applicable" as the first account option is internal vocabulary; the account should be pre-selected when there's only one.</li>
+      <li>Concern list mixes jargon ("ADA Status", "E-Pass Balance Transfer") with plain items and is long enough to scroll under the Back control (<span class="ref">8061</span>, <span class="ref">8062</span>). No search, no grouping, no explanation.</li>
+      <li>Cancel is a saturated orange block with equal weight to Send — the destructive-looking button is the one users hit by mistake.</li>
+      <li>No indication of what happens after Send: no reference number, no expected response time, no history of past messages.</li>
+      <li>Keyboard overlaps the action buttons when typing the message (<span class="ref">8065</span>).</li>
+    </ul>
+    <p class="works">Per-tollway hotlines and a categorised form are the right building blocks; call sheet confirms the number before dialling.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Legal Notices, EULA, Privacy Policy, Terms &amp; Conditions</h3><span class="ref">8066</span>–<span class="ref">8070</span></div>
+  <div class="body">
+    <p class="obs">Three list items; each opens a long-form document in-app.</p>
+    <ul>
+      <li>The EULA is between the user and "Intelligent E-Processes Technologies Corp. (IETC)" — a name that appears nowhere else in the app. The T&amp;C lists seven tollway companies. Customers who think they are dealing with "Autosweep" or "San Miguel" meet an unexplained cast of entities exactly where trust matters.</li>
+      <li>On the Privacy Policy screen (<span class="ref">8068</span>) the iOS home indicator renders as a black bar over the header and over the Back label — a safe-area layout bug.</li>
+      <li>No table of contents, no "last updated" date in the in-app versions, no search. Fine for compliance, poor for anyone trying to find the minimum-balance or sticker-replacement clause.</li>
+    </ul>
+    <p class="works">Readable typography, native scrolling, no PDF handoff.</p>
+  </div>
+</div>
+
+<div class="screen">
+  <div class="head"><h3>Add Account</h3><span class="ref">8071</span></div>
+  <div class="body">
+    <p class="obs">Enter Account Number (1234567) · Enter Plate/Card Number (ABC1234 or A123456) · Enter Vehicle Alias · Add Account.</p>
+    <ul>
+      <li>No guidance on where the account number lives (RFID card? sticker receipt? SOA?). A first-time user with only a sticker on the windshield may be stuck.</li>
+      <li>No scan (card barcode / OCR), no lookup by plate + OTP, no explanation of "Plate/Card" as two alternatives.</li>
+      <li>Alias is requested but the existing account shows "Not Set" — inconsistent expectations between add and existing flows.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="pain">Key pain points and evidence</h2>
+<p>Thirty-two findings, each with severity, impact, recommendation and validation needs. Severity weighs <em>frequency</em> (how many users hit it), <em>impact</em> (what it costs them) and <em>trust</em> (whether it makes the customer doubt the product or the company).</p>
+
+<!-- CRITICAL -->
+<div class="finding crit" id="f1">
+  <div class="top"><span class="id">F1</span><h3>Balance is hidden from Home</h3><span class="pill crit">Critical</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Home <span class="ref">8042</span> → Account <span class="ref">8045</span> (J1)</dd>
+    <dt>Problem</dt><dd>The app's most-checked value requires navigating to a secondary screen. Home shows a greeting, an account number and empty space.</dd>
+    <dt>User impact</dt><dd>Every session costs an extra tap; drivers checking at a stoplight or before a gantry get no answer at a glance. Increases the chance of an insufficient-balance stop at the toll plaza.</dd>
+    <dt>Recommendation</dt><dd>Show balance per account on the Home card, with a status colour (OK / low / critical) and a one-tap "Reload" button in the card itself.</dd>
+    <dt>Rationale</dt><dd>Prepaid products (telco load, e-wallets) universally lead with balance; users' mental model is "how much do I have," not "which account am I."</dd>
+    <dt>Validate</dt><dd>Confirm balance is available from the accounts endpoint at Home load time; confirm minimum-balance threshold per tollway to drive the status colour.</dd>
+  </dl>
+</div>
+
+<div class="finding crit" id="f2">
+  <div class="top"><span class="id">F2</span><h3>Traffic Updates is a webview blocked by a consent modal</h3><span class="pill crit">Critical</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Traffic Updates tab <span class="ref">8050</span> <span class="ref">8052</span> <span class="ref">8053</span> <span class="ref">8054</span> <span class="ref">8055</span> (J6)</dd>
+    <dt>Problem</dt><dd>One of four primary tabs embeds the SMC Tollways website. It loads blank → spinner → a "We have an updated Privacy Statement" modal (pre-ticked checkbox) over the map. Following the link replaces the tab with a 2018 policy page and the website's own nav.</dd>
+    <dt>User impact</dt><dd>Feature is effectively unusable on first visit; users are trapped in a website inside a tab with no back. Pre-ticked consent damages trust and may be non-compliant.</dd>
+    <dt>Recommendation</dt><dd>Short term: suppress the web consent modal inside the app (consent is already covered by the app's own Privacy Policy) and lock the webview to the map route. Long term: render a native traffic view from the same feed (per-tollway status + freshness).</dd>
+    <dt>Rationale</dt><dd>A primary tab must work on the first tap; consent should be collected once, in-app, not by an embedded site.</dd>
+    <dt>Validate</dt><dd>Whether the modal recurs after acceptance (cookie persistence in the webview); whether a JSON feed exists behind the map.</dd>
+  </dl>
+</div>
+
+<div class="finding crit" id="f3">
+  <div class="top"><span class="id">F3</span><h3>Toll Calculator tab is present but disabled</h3><span class="pill crit">Critical</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Home tab bar <span class="ref">8042</span> → alert <span class="ref">8049</span></dd>
+    <dt>Problem</dt><dd>A greyed primary tab remains tappable and produces "Feature Disabled — Toll Calculator is currently disabled." No reason, no ETA, no alternative.</dd>
+    <dt>User impact</dt><dd>Half of the primary navigation is dead (with F2). Users learn the nav is unreliable and stop exploring; a frequently requested capability (fare lookup) is advertised then withheld.</dd>
+    <dt>Recommendation</dt><dd>Remove the tab until the feature ships (three tabs is fine), or replace it with a static fare-matrix view that needs no live service. If it must stay, show an inline "Coming back soon" state instead of a modal.</dd>
+    <dt>Rationale</dt><dd>Primary navigation is a promise; every item must resolve to something useful.</dd>
+    <dt>Validate</dt><dd>Why the feature is disabled (backend cost? accuracy?), and how often users tap it — analytics will show demand.</dd>
+  </dl>
+</div>
+
+<div class="finding crit" id="f4">
+  <div class="top"><span class="id">F4</span><h3>No transaction history; SOA generator is the only path to charges</h3><span class="pill crit">Critical</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Home → SOA <span class="ref">8044</span> <span class="ref">8046</span>–<span class="ref">8048</span> (J3)</dd>
+    <dt>Problem</dt><dd>Users cannot see individual tolls or reloads anywhere. The SOA form needs six dropdown selections, defaults to a same-day range, disables half the "To" fields without explanation, and never says what "Generate" produces.</dd>
+    <dt>User impact</dt><dd>"Was I charged correctly?" and "Did my load go through?" — the two most trust-sensitive questions — have no direct answer. This is consistent with "Incorrect Charging" and "Uncredited Load" being named support categories.</dd>
+    <dt>Recommendation</dt><dd>Add a native, reverse-chronological transaction list (tolls, reloads, adjustments) on the account screen with per-row detail (plaza, lane, time, amount, balance after). Keep SOA as an "Export statement" action with a native date-range picker and presets.</dd>
+    <dt>Rationale</dt><dd>A list users can scroll beats a form users must configure. Self-service reduces support volume on the two largest concern categories.</dd>
+    <dt>Validate</dt><dd>Transaction data latency from plazas; what the generated SOA currently looks like and how it's delivered.</dd>
+  </dl>
+</div>
+
+<!-- HIGH -->
+<div class="finding high" id="f5">
+  <div class="top"><span class="id">F5</span><h3>Reload is a secondary section, not a primary action</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Account <span class="ref">8045</span> → <span class="ref">R1</span> <span class="ref">R3</span> <span class="ref">R8</span> (J2)</dd>
+    <dt>Problem</dt><dd>The core revenue and satisfaction action lives below alias/delete controls as three equal cards. Seven screens separate Home from the payment step. The amount is typed on each method screen (re-entered if the user switches), with no presets, currency prefix, or min/max. No saved default method; no post-payment confirmation captured.</dd>
+    <dt>User impact</dt><dd>Slower top-ups under time pressure; more abandoned reloads; "Uncredited Load" tickets when the return leg isn't confirmed in-app.</dd>
+    <dt>Recommendation</dt><dd>Primary "Reload" CTA on Home and Account → one amount step (presets ₱200 / ₱500 / ₱1,000 / custom, limits shown, fee preview) → one method step listing all six providers plus saved cards, last-used pre-selected → summary → in-app receipt with reference number and new balance.</dd>
+    <dt>Rationale</dt><dd>Standard prepaid top-up pattern; collapsing method-then-amount-then-provider into amount-then-provider removes two screens and the duplicate amount entry.</dd>
+    <dt>Validate</dt><dd>Reload funnel drop-off per method; whether Xendit returns a callback the app can show.</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f6">
+  <div class="top"><span class="id">F6</span><h3>Delete Account has the same weight as Update Alias</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Account <span class="ref">8045</span></dd>
+    <dt>Problem</dt><dd>Two identical green circles side by side; the destructive one is adjacent to the reload section users scan toward.</dd>
+    <dt>User impact</dt><dd>Accidental taps; anxiety; if no confirmation exists, catastrophic (unlinking the account from the app).</dd>
+    <dt>Recommendation</dt><dd>Move to an overflow/"Manage account" screen, style as a text-level destructive action, require confirmation that explains consequences ("This removes the account from this app. Your RFID and balance are not affected.").</dd>
+    <dt>Rationale</dt><dd>Destructive actions need distance, distinct styling and an undo or confirm step.</dd>
+    <dt>Validate</dt><dd>Whether a confirmation dialog exists today; what "delete" actually does (unlink vs. close).</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f7">
+  <div class="top"><span class="id">F7</span><h3>Announcement screen renders empty</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Menu → View Announcement <span class="ref">8057</span></dd>
+    <dt>Problem</dt><dd>White screen with no loading, empty or error state.</dd>
+    <dt>User impact</dt><dd>Users assume the app is broken; official communications (rate changes, outages, sticker recalls) go unseen.</dd>
+    <dt>Recommendation</dt><dd>Design explicit empty ("No announcements right now") and loading states; surface the latest announcement as a dismissible banner on Home; add a notifications inbox.</dd>
+    <dt>Rationale</dt><dd>Every list needs three states; an operator's announcements are safety-relevant.</dd>
+    <dt>Validate</dt><dd>Whether this was a load failure or genuinely no content.</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f8">
+  <div class="top"><span class="id">F8</span><h3>Navigation model breaks on every child screen</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>All child screens: <span class="ref">8043</span> <span class="ref">8044</span> <span class="ref">8045</span> <span class="ref">8057</span>–<span class="ref">8071</span></dd>
+    <dt>Problem</dt><dd>The tab bar disappears and is replaced by a lone centered "Back" pill; the header has no back affordance; no title breadcrumb indicates which tab you came from.</dd>
+    <dt>User impact</dt><dd>Users lose orientation and must back out to Home to switch context. Back is also the only control in a 44px-tall footer, wasting space.</dd>
+    <dt>Recommendation</dt><dd>Keep the tab bar persistent; put Back in the header (iOS-standard leading chevron + title); use the footer for the screen's primary action (e.g. "Reload", "Generate").</dd>
+    <dt>Rationale</dt><dd>Platform conventions reduce learning; persistent tabs preserve place.</dd>
+    <dt>Validate</dt><dd>Check Android build for parity — this may be a cross-platform framework default.</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f9">
+  <div class="top"><span class="id">F9</span><h3>Greeting shows "AUTOSWEEP TO GO" instead of the customer's name</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Home <span class="ref">8042</span>, Menu <span class="ref">8051</span></dd>
+    <dt>Problem</dt><dd>The name slot is populated with what looks like a product/placeholder string. Menu repeats it above the email.</dd>
+    <dt>User impact</dt><dd>Personalisation backfires; reads as a bug or as someone else's account.</dd>
+    <dt>Recommendation</dt><dd>Bind the greeting to first name; fall back to "Welcome back" with no name when absent; allow editing display name in Menu.</dd>
+    <dt>Rationale</dt><dd>A wrong name is worse than no name.</dd>
+    <dt>Validate</dt><dd><b>Assumption</b> — this could be the tester's registered name. Check the registration flow and the profile field.</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f10">
+  <div class="top"><span class="id">F10</span><h3>Support form: hidden numbers, jargon categories, no follow-through</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Customer Care <span class="ref">8059</span>–<span class="ref">8065</span> (J4)</dd>
+    <dt>Problem</dt><dd>Five identical circles hide the numbers; icons duplicate; no hours. Concern list includes "ADA Status", "E-Pass Balance Transfer", "Not Applicable". After Send there is no reference, ETA, or history.</dd>
+    <dt>User impact</dt><dd>Wrong hotline dialled; wrong category chosen; duplicate tickets because users can't tell if the first went through.</dd>
+    <dt>Recommendation</dt><dd>List hotlines as rows with visible numbers, hours, and Call/Copy; pre-select the only account; group concerns (Charges · Load · Sticker &amp; Card · Account) with plain-language labels and one-line helpers; show a confirmation with ticket number and a "My requests" list.</dd>
+    <dt>Rationale</dt><dd>Visible information beats hidden; closure reduces repeat contacts.</dd>
+    <dt>Validate</dt><dd>Ticket system's ability to return an ID; which categories drive the most volume.</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f11">
+  <div class="top"><span class="id">F11</span><h3>Add Account requires an account number with no guidance</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Add Account <span class="ref">8071</span> (J5)</dd>
+    <dt>Problem</dt><dd>Three fields, no help on where to find the 7-digit number, no scan or lookup, "Plate/Card Number" unexplained.</dd>
+    <dt>User impact</dt><dd>Onboarding failure — consistent with "Unable to Register Web Portal/Mobile App" existing as a support category.</dd>
+    <dt>Recommendation</dt><dd>Add "Where do I find this?" with a photo of the RFID card; offer card scan; allow plate + registered mobile OTP as an alternative path.</dd>
+    <dt>Rationale</dt><dd>The account number is a system identifier; the plate is what the customer knows.</dd>
+    <dt>Validate</dt><dd>Whether plate + OTP lookup is feasible under current data-protection policy.</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f12">
+  <div class="top"><span class="id">F12</span><h3>Vehicle Info shows incomplete data with no way to complete it</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Vehicle Info <span class="ref">8043</span></dd>
+    <dt>Problem</dt><dd>Color "N/A", Make &amp; Model blank, alias "Not Set" elsewhere. No sticker status, no actions.</dd>
+    <dt>User impact</dt><dd>Screen feels broken; the user can't fix it; no path to "my sticker isn't reading."</dd>
+    <dt>Recommendation</dt><dd>Hide empty fields or replace with "Add details"; show sticker/card status and issue date; add "Report a sticker problem" and "Request replacement" actions here.</dd>
+    <dt>Rationale</dt><dd>A vehicle screen should answer "is my tag OK?" not display database columns.</dd>
+    <dt>Validate</dt><dd>Which vehicle fields are editable by the customer vs. the operator.</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f27">
+  <div class="top"><span class="id">F27</span><h3>Bank credentials are entered inside the Autosweep webview</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Direct Debit <span class="ref">R6</span> <span class="ref">R7</span> (J2)</dd>
+    <dt>Problem</dt><dd>The BPI login page renders under the green "Direct Debit" header with the app's Back pill, no URL bar, no padlock, and copy that says "link your BPI Online Banking account to XENDIT."</dd>
+    <dt>User impact</dt><dd>Security-aware customers abandon (banks explicitly warn against this pattern); less-aware customers are trained to accept it, which is worse. Either way, the app's most sensitive moment looks like phishing.</dd>
+    <dt>Recommendation</dt><dd>Open bank authentication in <code>SFSafariViewController</code> / Chrome Custom Tab (visible domain and padlock) or via the bank's app deep-link where available; precede it with an interstitial: "You'll sign in on BPI's secure page. Autosweep never sees your bank password." Disable the app Back control while the bank session is live.</dd>
+    <dt>Rationale</dt><dd>Trust at the payment step is the whole product; a verifiable domain is the minimum signal.</dd>
+    <dt>Validate</dt><dd>Whether Xendit's Direct Debit SDK supports an external-browser or app-to-app mode for each bank.</dd>
+  </dl>
+</div>
+
+<div class="finding high" id="f28">
+  <div class="top"><span class="id">F28</span><h3>Convenience fee disclosed only at the final summary</h3><span class="pill high">High</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Account <span class="ref">8045</span> → <span class="ref">R3</span>/<span class="ref">R8</span> → Summary <span class="ref">R4</span> <span class="ref">R9</span></dd>
+    <dt>Problem</dt><dd>₱13.00 on a ₱200.00 reload (6.5%) appears for the first time after amount and provider are committed. No screen before the summary mentions a fee, and nothing explains whether it is flat, per-method, or tiered.</dd>
+    <dt>User impact</dt><dd>Surprise cost at the point of commitment; users either abandon or resent every reload. Small-value top-ups — the ones drivers make in a hurry — are hit hardest proportionally.</dd>
+    <dt>Recommendation</dt><dd>Show the fee on the method picker ("+ ₱13 fee" per option) and as a live preview beside the amount field ("You'll pay ₱213.00"). If the fee is flat, nudge toward larger loads ("Load ₱500 and the fee is 2.6%"). If fee-free channels exist (over-the-counter, certain banks), say so.</dd>
+    <dt>Rationale</dt><dd>Price transparency before commitment is a baseline expectation and, for BSP-regulated payments, the safer disclosure practice.</dd>
+    <dt>Validate</dt><dd>Fee schedule per channel and amount; whether the fee is Xendit's, the operator's, or both.</dd>
+  </dl>
+</div>
+
+<!-- MEDIUM -->
+<div class="finding med" id="f29">
+  <div class="top"><span class="id">F29</span><h3>Credit Card screen has no visible pay action; card entry lacks trust signals</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Credit Card <span class="ref">R1</span>, Add Credit Card <span class="ref">R2</span></dd>
+    <dt>Problem</dt><dd>R1 shows a saved card with a red delete icon and a floating "+" but no "Pay" — the primary action is an unlabelled row tap. R2 asks for full card number, expiry (two dropdowns), CVV, name, email and mobile in the app's own input style, with no security messaging, brand detection, formatting, or scan option.</dd>
+    <dt>User impact</dt><dd>Users don't know how to proceed from R1; delete is the most prominent control. On R2, hesitation to type card details into an app with no security cues; re-entering email and mobile the account already holds.</dd>
+    <dt>Recommendation</dt><dd>Make saved cards selectable with a radio and a fixed "Pay ₱—" button; move delete to swipe or an overflow. On R2: single MM/YY field, live brand icon and grouping, camera scan, a "Secured by Xendit — Autosweep never stores your card" line, and prefill email/mobile from the profile.</dd>
+    <dt>Rationale</dt><dd>Card entry is a conversion cliff; every trust cue and removed field lifts completion.</dd>
+    <dt>Validate</dt><dd>Whether R2 is a Xendit hosted/tokenisation component (affects what can be restyled) and PCI scope of the current build.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f30">
+  <div class="top"><span class="id">F30</span><h3>GCash handoff renders a blank QR and has no captured return state</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>E-Wallet <span class="ref">R10</span></dd>
+    <dt>Problem</dt><dd>The QR area is empty; the fallback instruction assumes a second device; the Autosweep Back control stays active mid-payment; what happens after "Open in GCash" (success, failure, timeout, receipt) is not observable.</dd>
+    <dt>User impact</dt><dd>Confusion on the handoff screen; uncertainty after paying — the direct cause of "did my load go through?" calls.</dd>
+    <dt>Recommendation</dt><dd>Hide the QR path on the same device or label it "Paying from another phone?"; show a loading skeleton until the QR renders; on return, poll for status and show a receipt (reference, amount, fee, new balance) or a clear "pending — we'll notify you" state with push on credit.</dd>
+    <dt>Rationale</dt><dd>Closure after payment is the moment that determines whether the user trusts the app with money next time.</dd>
+    <dt>Validate</dt><dd>Capture the post-payment return for each wallet and bank; measure time-to-credit.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f31">
+  <div class="top"><span class="id">F31</span><h3>Reload structure is method → amount → provider instead of amount → provider</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Account <span class="ref">8045</span> → <span class="ref">R1</span> / <span class="ref">R3</span> / <span class="ref">R8</span></dd>
+    <dt>Problem</dt><dd>Users must first classify their provider (is Maya an "E-Wallet"? is a debit card a "Credit Card"?) before seeing any provider names; the amount field is duplicated on each of the three method screens.</dd>
+    <dt>User impact</dt><dd>Extra step and a taxonomy decision the user shouldn't have to make; re-typing the amount when switching.</dd>
+    <dt>Recommendation</dt><dd>One provider list grouped under headings (Saved cards · Banks · Wallets) after a single amount step.</dd>
+    <dt>Rationale</dt><dd>Show the options, don't ask the user to guess the category.</dd>
+    <dt>Validate</dt><dd>None — structural.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f13">
+  <div class="top"><span class="id">F13</span><h3>Date-range picker built from six dropdowns</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Generate SOA <span class="ref">8044</span>–<span class="ref">8048</span></dd>
+    <dt>Problem</dt><dd>Month/Day/Year dropdowns × 2; lists overlay the CTA; "To" fields disabled silently; "Sept"/"Sep" inconsistency; year list without scroll cue.</dd>
+    <dt>User impact</dt><dd>Slow, error-prone, and confusing about the allowed range.</dd>
+    <dt>Recommendation</dt><dd>Presets (This month / Last month / Last 3 months / Custom) + native date pickers; explain any cap ("Statements cover up to 31 days").</dd>
+    <dt>Rationale</dt><dd>One decision instead of six.</dd>
+    <dt>Validate</dt><dd>The actual range constraint.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f14">
+  <div class="top"><span class="id">F14</span><h3>Input styling reads as disabled or as a drop-zone</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>All forms: <span class="ref">8044</span> <span class="ref">8058</span> <span class="ref">8059</span> <span class="ref">8071</span></dd>
+    <dt>Problem</dt><dd>Every input has a dashed outer frame around a solid inner border; focus is an orange dashed ring while the brand is green and orange is also the Cancel colour.</dd>
+    <dt>User impact</dt><dd>Fields look inactive; focus colour conflicts with semantic use of orange.</dd>
+    <dt>Recommendation</dt><dd>Single solid 1px border, 2px green focus ring, error state in red with inline message.</dd>
+    <dt>Rationale</dt><dd>Dashed borders conventionally mean "drop here" or "placeholder."</dd>
+    <dt>Validate</dt><dd>None — visual.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f15">
+  <div class="top"><span class="id">F15</span><h3>Cancel styled as a saturated orange block next to Send</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Customer Care <span class="ref">8060</span> <span class="ref">8065</span></dd>
+    <dt>Problem</dt><dd>Equal-weight, high-chroma secondary button.</dd>
+    <dt>User impact</dt><dd>Mis-taps discard the message; keyboard also overlaps both buttons.</dd>
+    <dt>Recommendation</dt><dd>Text/ghost Cancel; Send as the only filled button; keep actions above the keyboard.</dd>
+    <dt>Rationale</dt><dd>One primary action per screen.</dd>
+    <dt>Validate</dt><dd>None.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f16">
+  <div class="top"><span class="id">F16</span><h3>Card hierarchy leads with account number over plate</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Home <span class="ref">8042</span>, Vehicle Info <span class="ref">8043</span></dd>
+    <dt>Problem</dt><dd>3631685 is the large green label; D109224 is secondary grey. "MAIN ACCOUNT" header with a single account.</dd>
+    <dt>User impact</dt><dd>Multi-vehicle households can't tell cards apart at a glance.</dd>
+    <dt>Recommendation</dt><dd>Lead with alias (or plate when alias unset), balance beneath, account number as small caption. Prompt to set an alias on first launch.</dd>
+    <dt>Rationale</dt><dd>Match the customer's vocabulary.</dd>
+    <dt>Validate</dt><dd>Proportion of accounts with &gt;1 vehicle.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f17">
+  <div class="top"><span class="id">F17</span><h3>Loading and empty states are undesigned</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Splash <span class="ref">8041</span>, Traffic <span class="ref">8050</span> <span class="ref">8052</span>, Announcement <span class="ref">8057</span></dd>
+    <dt>Problem</dt><dd>Blank screens, off-brand spinner, no offline/error states captured anywhere.</dd>
+    <dt>User impact</dt><dd>Uncertainty; unnecessary retries; app-store reviews about "blank screens."</dd>
+    <dt>Recommendation</dt><dd>Skeleton loaders in brand colours; explicit empty, error and offline states with a retry action; cache last-known balance for offline display.</dd>
+    <dt>Rationale</dt><dd>Toll roads have patchy signal; offline resilience is a core requirement.</dd>
+    <dt>Validate</dt><dd>Observe actual offline behaviour.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f18">
+  <div class="top"><span class="id">F18</span><h3>Reload option copy describes the system, not the action</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Account <span class="ref">8045</span>; provider cards <span class="ref">R3</span> <span class="ref">R8</span>; summary <span class="ref">R9</span></dd>
+    <dt>Problem</dt><dd>Method picker: "E-Wallet — Connect a digital wallet for easy transactions"; "Direct Debit — Pay by using your bank account." Provider cards rotate three phrasings ("Pay instantly with…", "Use your … balance for payment", "Pay securely via…") that imply different behaviours. Summary prints "GCASH".</dd>
+    <dt>User impact</dt><dd>Users can't tell which wallets are supported until one level down, or whether "Direct Debit" sets up a standing arrangement; varied copy reads as varied risk.</dd>
+    <dt>Recommendation</dt><dd>Show provider logos on the method picker; one consistent descriptor per provider (or none — the logo suffices); correct casing.</dd>
+    <dt>Rationale</dt><dd>Specific beats generic in payment UI; identical things should be described identically.</dd>
+    <dt>Validate</dt><dd>None.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f19">
+  <div class="top"><span class="id">F19</span><h3>Legal entities unexplained (IETC, seven tollway companies)</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>EULA <span class="ref">8067</span>, T&amp;C <span class="ref">8069</span> <span class="ref">8070</span></dd>
+    <dt>Problem</dt><dd>Users of "Autosweep by San Miguel" agree to terms with IETC, SOMCO, MATES, STC, CMMTC, SLTC, VTDI, SIDC — none introduced.</dd>
+    <dt>User impact</dt><dd>Mild distrust; confusion about who to contact.</dd>
+    <dt>Recommendation</dt><dd>Add a one-paragraph plain-language preface ("Autosweep is operated by IETC on behalf of the SMC tollway companies…") and an "About" screen.</dd>
+    <dt>Rationale</dt><dd>Transparency is cheap; confusion at the legal layer erodes brand trust.</dd>
+    <dt>Validate</dt><dd>Legal sign-off on preface wording.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f20">
+  <div class="top"><span class="id">F20</span><h3>Safe-area rendering bug on Privacy Policy</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Privacy Policy <span class="ref">8068</span></dd>
+    <dt>Problem</dt><dd>Home-indicator bar renders over the header and over the "Back" label.</dd>
+    <dt>User impact</dt><dd>Looks broken; Back label partially obscured.</dd>
+    <dt>Recommendation</dt><dd>Respect safe-area insets on this screen; audit other long-scroll screens.</dd>
+    <dt>Rationale</dt><dd>Visible defects in legal screens signal low care.</dd>
+    <dt>Validate</dt><dd>Reproduce on other devices.</dd>
+  </dl>
+</div>
+
+<div class="finding med" id="f21">
+  <div class="top"><span class="id">F21</span><h3>Menu manages almost nothing</h3><span class="pill med">Medium</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Menu <span class="ref">8051</span></dd>
+    <dt>Problem</dt><dd>No profile, notification preferences, security (biometrics/PIN), language, FAQ, or "My requests."</dd>
+    <dt>User impact</dt><dd>Users can't self-serve routine account tasks; "Update Mobile Number" is a support ticket category instead of a setting.</dd>
+    <dt>Recommendation</dt><dd>Reorganise into Profile · Security · Notifications · Help · Legal · About.</dd>
+    <dt>Rationale</dt><dd>Each ticket category that becomes a setting removes support load.</dd>
+    <dt>Validate</dt><dd>Which profile fields can be self-edited under KYC rules.</dd>
+  </dl>
+</div>
+
+<!-- LOW -->
+<div class="finding low" id="f22">
+  <div class="top"><span class="id">F22</span><h3>Label drift and typos</h3><span class="pill low">Low</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Menu <span class="ref">8051</span> → <span class="ref">8058</span> <span class="ref">8066</span>; Home ↔ Account</dd>
+    <dt>Problem</dt><dd>"Annoucement"; Change vs Update Password; Legal Notice vs Legal Notices; Balance shortcut opens "Account"; "SOA" unexpanded.</dd>
+    <dt>User impact</dt><dd>Small but cumulative erosion of polish and confidence.</dd>
+    <dt>Recommendation</dt><dd>Content audit; one term per concept; expand acronyms on first use ("Statement (SOA)").</dd>
+    <dt>Rationale</dt><dd>Consistency is a trust signal.</dd>
+    <dt>Validate</dt><dd>None.</dd>
+  </dl>
+</div>
+
+<div class="finding low" id="f23">
+  <div class="top"><span class="id">F23</span><h3>Low-contrast caption text and small labels</h3><span class="pill low">Low</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Vehicle Info <span class="ref">8043</span>, Account <span class="ref">8045</span>, tab bar</dd>
+    <dt>Problem</dt><dd>Grey uppercase captions (TAG NUMBER, CURRENT BALANCE) appear to be roughly 3:1 against white — below WCAG AA 4.5:1 for small text. Disabled tab label is even fainter.</dd>
+    <dt>User impact</dt><dd>Hard to read in sunlight/in-car; older drivers disproportionately affected.</dd>
+    <dt>Recommendation</dt><dd>Darken captions to ≥4.5:1; minimum 13pt; support Dynamic Type.</dd>
+    <dt>Rationale</dt><dd>In-car use is a high-glare context.</dd>
+    <dt>Validate</dt><dd>Measure exact hex values in the build; test with Dynamic Type at XL.</dd>
+  </dl>
+</div>
+
+<div class="finding low" id="f24">
+  <div class="top"><span class="id">F24</span><h3>Icon semantics are weak</h3><span class="pill low">Low</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Customer Care <span class="ref">8059</span>, Menu <span class="ref">8051</span>, tab bar</dd>
+    <dt>Problem</dt><dd>Two hotlines share a car icon, two share a bus icon; "eye" for Announcement; "car" for Traffic Updates duplicates the Vehicles shortcut icon.</dd>
+    <dt>User impact</dt><dd>Icons carry no information, so users must read every label.</dd>
+    <dt>Recommendation</dt><dd>Use tollway logos or initials for hotlines; megaphone for announcements; road/traffic-light for traffic.</dd>
+    <dt>Rationale</dt><dd>Icons should differentiate, not decorate.</dd>
+    <dt>Validate</dt><dd>Brand permission to use tollway marks.</dd>
+  </dl>
+</div>
+
+<div class="finding low" id="f25">
+  <div class="top"><span class="id">F25</span><h3>Password screen lacks rules and recovery</h3><span class="pill low">Low</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Update Password <span class="ref">8058</span></dd>
+    <dt>Problem</dt><dd>No requirements listed, no strength meter, no "Forgot current password?"</dd>
+    <dt>User impact</dt><dd>Trial-and-error submissions; dead end for users who don't remember the current password.</dd>
+    <dt>Recommendation</dt><dd>Show rules inline; live validation; link to recovery.</dd>
+    <dt>Rationale</dt><dd>Standard form hygiene.</dd>
+    <dt>Validate</dt><dd>None.</dd>
+  </dl>
+</div>
+
+<div class="finding low" id="f32">
+  <div class="top"><span class="id">F32</span><h3>Payment Summary illustration pushes the numbers down</h3><span class="pill low">Low</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Summary <span class="ref">R4</span> <span class="ref">R9</span></dd>
+    <dt>Problem</dt><dd>A stock illustration occupies roughly a third of the viewport above the one table the user needs to read.</dd>
+    <dt>User impact</dt><dd>On smaller devices the total and CTA fall below the fold; the decorative image delays the decision.</dd>
+    <dt>Recommendation</dt><dd>Drop or shrink the illustration; lead with the total.</dd>
+    <dt>Rationale</dt><dd>At the commitment step, content is the hero.</dd>
+    <dt>Validate</dt><dd>None.</dd>
+  </dl>
+</div>
+
+<div class="finding low" id="f26">
+  <div class="top"><span class="id">F26</span><h3>Splash copy exposes a system step</h3><span class="pill low">Low</span></div>
+  <dl>
+    <dt>Screen / flow</dt><dd>Splash <span class="ref">8041</span></dd>
+    <dt>Problem</dt><dd>"Checking connection…" with a determinate-looking bar.</dd>
+    <dt>User impact</dt><dd>Minor; can prompt users to toggle Wi-Fi unnecessarily.</dd>
+    <dt>Recommendation</dt><dd>Indeterminate indicator, no step text; if the check fails, show an offline screen with last-known balance.</dd>
+    <dt>Rationale</dt><dd>Users care about outcomes, not steps.</dd>
+    <dt>Validate</dt><dd>None.</dd>
+  </dl>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="priority">Prioritized problem list</h2>
+<p>Ranked by severity, then by how many users hit it per session. Effort is a rough design + engineering estimate assuming existing APIs; it is not a commitment.</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>#</th><th>Finding</th><th>Severity</th><th>Frequency</th><th>Trust impact</th><th>Effort</th><th>Type</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td><a href="#f1">F1 Balance hidden from Home</a></td><td><span class="pill crit">Critical</span></td><td>Every session</td><td>High</td><td>S</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">2</td><td><a href="#f4">F4 No transaction history</a></td><td><span class="pill crit">Critical</span></td><td>Weekly</td><td>Very high</td><td>M–L</td><td><span class="pill strat">Strategic</span></td></tr>
+    <tr><td class="num">3</td><td><a href="#f2">F2 Traffic webview + consent modal</a></td><td><span class="pill crit">Critical</span></td><td>Per visit</td><td>High</td><td>S (suppress) / L (native)</td><td>Both</td></tr>
+    <tr><td class="num">4</td><td><a href="#f3">F3 Disabled Toll Calculator tab</a></td><td><span class="pill crit">Critical</span></td><td>Per visit</td><td>Medium</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">5</td><td><a href="#f27">F27 Bank login inside app webview</a></td><td><span class="pill high">High</span></td><td>Per bank reload</td><td>Very high</td><td>S–M</td><td>Both</td></tr>
+    <tr><td class="num">6</td><td><a href="#f28">F28 Fee disclosed only at summary</a></td><td><span class="pill high">High</span></td><td>Every reload</td><td>High</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">7</td><td><a href="#f5">F5 Reload not primary / 7 screens deep</a></td><td><span class="pill high">High</span></td><td>Weekly</td><td>High</td><td>M</td><td><span class="pill strat">Strategic</span></td></tr>
+    <tr><td class="num">8</td><td><a href="#f8">F8 Navigation model breaks</a></td><td><span class="pill high">High</span></td><td>Every session</td><td>Medium</td><td>M</td><td><span class="pill strat">Strategic</span></td></tr>
+    <tr><td class="num">9</td><td><a href="#f6">F6 Delete Account weight</a></td><td><span class="pill high">High</span></td><td>Rare</td><td>Very high</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">10</td><td><a href="#f10">F10 Support form</a></td><td><span class="pill high">High</span></td><td>Monthly</td><td>High</td><td>M</td><td>Both</td></tr>
+    <tr><td class="num">11</td><td><a href="#f7">F7 Empty Announcement</a></td><td><span class="pill high">High</span></td><td>Occasional</td><td>Medium</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">12</td><td><a href="#f11">F11 Add Account guidance</a></td><td><span class="pill high">High</span></td><td>Once</td><td>High</td><td>S</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">13</td><td><a href="#f9">F9 Greeting name</a></td><td><span class="pill high">High</span></td><td>Every session</td><td>Medium</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">14</td><td><a href="#f12">F12 Vehicle Info incomplete</a></td><td><span class="pill high">High</span></td><td>Occasional</td><td>Medium</td><td>S</td><td>Both</td></tr>
+    <tr><td class="num">15</td><td><a href="#f30">F30 GCash handoff / no return state</a></td><td><span class="pill med">Medium</span></td><td>Per wallet reload</td><td>High</td><td>S–M</td><td>Both</td></tr>
+    <tr><td class="num">16</td><td><a href="#f29">F29 Card screen no pay action; card entry trust</a></td><td><span class="pill med">Medium</span></td><td>Per card reload</td><td>High</td><td>S</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">17</td><td><a href="#f31">F31 Method → amount → provider structure</a></td><td><span class="pill med">Medium</span></td><td>Every reload</td><td>Low</td><td>S</td><td><span class="pill strat">Strategic</span></td></tr>
+    <tr><td class="num">18</td><td><a href="#f13">F13 Six-dropdown date range</a></td><td><span class="pill med">Medium</span></td><td>Monthly</td><td>Low</td><td>S</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">19</td><td><a href="#f17">F17 Loading/empty/offline states</a></td><td><span class="pill med">Medium</span></td><td>Frequent</td><td>Medium</td><td>S</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">20</td><td><a href="#f21">F21 Menu manages nothing</a></td><td><span class="pill med">Medium</span></td><td>Occasional</td><td>Medium</td><td>M</td><td><span class="pill strat">Strategic</span></td></tr>
+    <tr><td class="num">21</td><td><a href="#f16">F16 Card hierarchy</a></td><td><span class="pill med">Medium</span></td><td>Every session</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">22</td><td><a href="#f18">F18 Reload copy</a></td><td><span class="pill med">Medium</span></td><td>Weekly</td><td>Medium</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">23</td><td><a href="#f14">F14 Input styling</a></td><td><span class="pill med">Medium</span></td><td>Frequent</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">24</td><td><a href="#f15">F15 Orange Cancel</a></td><td><span class="pill med">Medium</span></td><td>Monthly</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">25</td><td><a href="#f19">F19 Legal entities</a></td><td><span class="pill med">Medium</span></td><td>Rare</td><td>Medium</td><td>S</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">26</td><td><a href="#f20">F20 Safe-area bug</a></td><td><span class="pill med">Medium</span></td><td>Rare</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">27</td><td><a href="#f23">F23 Contrast</a></td><td><span class="pill low">Low</span></td><td>Every session</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">28</td><td><a href="#f22">F22 Label drift</a></td><td><span class="pill low">Low</span></td><td>Frequent</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">29</td><td><a href="#f32">F32 Summary illustration</a></td><td><span class="pill low">Low</span></td><td>Every reload</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">30</td><td><a href="#f24">F24 Icons</a></td><td><span class="pill low">Low</span></td><td>Occasional</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">31</td><td><a href="#f25">F25 Password rules</a></td><td><span class="pill low">Low</span></td><td>Rare</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+    <tr><td class="num">32</td><td><a href="#f26">F26 Splash copy</a></td><td><span class="pill low">Low</span></td><td>Every session</td><td>Low</td><td>XS</td><td><span class="pill qw">Quick win</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="solutions">Recommended design solutions</h2>
+<p>Per-finding recommendations are above; this section groups them into five coherent design moves so they can be scoped as work packages rather than 32 tickets.</p>
+
+<div class="sol">
+  <h4>1. A balance-first Home</h4>
+  <p>Each account card shows alias/plate → balance (large, tabular numerals) → status chip (OK / Low / Reload now) → primary "Reload" button. Below the cards: last 3 transactions and a dismissible announcement banner. Shortcuts collapse into the card (Vehicles, Statement). This resolves F1, F7 (banner), F9, F16 and gives F5 its entry point.</p>
+</div>
+<div class="sol">
+  <h4>2. A native Activity screen replacing "Generate SOA"</h4>
+  <p>Reverse-chronological list grouped by day; row = plaza/lane or "Reload via GCash", time, amount, running balance. Filter chips (Tolls · Reloads · Adjustments). Tap → detail with "Dispute this charge" that pre-fills the support form. "Export statement" in the header opens a native range picker with presets. Resolves F4, F13, and removes two support categories from the form (Request for SOA, Incorrect Charging become self-serve first).</p>
+</div>
+<div class="sol">
+  <h4>3. A three-step Reload flow</h4>
+  <p>Amount (presets + custom, limits and live fee preview "You'll pay ₱213") → Provider (one grouped list: saved cards · banks · wallets, each with its logo and fee, last used pre-selected) → Summary → provider authentication in an external secure browser or app deep-link, with an interstitial explaining what will happen → in-app receipt with reference number and new balance, plus a push notification when the load is credited. Resolves F5, F18, F27, F28, F29, F30, F31, F32 and targets the "Uncredited Load" category.</p>
+</div>
+<div class="sol">
+  <h4>4. A conventional navigation shell</h4>
+  <p>Persistent bottom tabs: Home · Activity · Traffic · Help · Menu (drop the disabled calculator; bring Help up from Menu since it is a top-5 job). Child screens use an iOS header with leading back chevron and title; footer reserved for primary actions. Resolves F3, F8, F10 (discoverability).</p>
+</div>
+<div class="sol">
+  <h4>5. A design-system pass</h4>
+  <p>Input: solid border, green focus ring, red error with inline copy. Buttons: one filled primary per screen; secondary as ghost; destructive as red text with confirm sheet. Captions ≥4.5:1. Loading = branded skeleton; every list has empty and error states; offline shows cached balance. Content: one term per concept, acronyms expanded. Resolves F6, F14, F15, F17, F20, F22–F26.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="missing">Missing features and product opportunities</h2>
+<p>Ordered by expected impact on the four business outcomes named in the brief. Items marked <span class="pill strat">Strategic</span> need backend or partner work; unmarked items are largely app-side.</p>
+<div class="grid2">
+  <div class="tile"><h4>Low-balance alerts &amp; auto-reload <span class="pill strat">Strategic</span></h4><p>Push when balance drops below a user-set threshold; optional auto top-up from a saved method.</p><p class="why">Satisfaction, retention, operational efficiency — fewer plaza stoppages and fewer "uncredited load" calls.</p></div>
+  <div class="tile"><h4>Transaction history &amp; dispute-from-row <span class="pill strat">Strategic</span></h4><p>See every toll and reload; dispute a charge with the record attached.</p><p class="why">Trust — turns the largest support category into self-service.</p></div>
+  <div class="tile"><h4>Sticker / card status</h4><p>Active, blocked, for replacement, last read at [plaza, time]. "Report unreadable sticker" and "Request replacement" actions.</p><p class="why">Trust, operational efficiency.</p></div>
+  <div class="tile"><h4>Native toll calculator / fare matrix</h4><p>Entry → exit → vehicle class → fare, using published matrices; works offline.</p><p class="why">Satisfaction — the tab already promises it.</p></div>
+  <div class="tile"><h4>Native traffic &amp; advisories <span class="pill strat">Strategic</span></h4><p>Per-tollway status cards with freshness, plaza closures, incident notices from the existing feed.</p><p class="why">Satisfaction, retention — a daily-use reason to open the app.</p></div>
+  <div class="tile"><h4>Notifications inbox</h4><p>Announcements, reload receipts, dispute updates, sticker alerts in one place with preferences.</p><p class="why">Trust, operational efficiency.</p></div>
+  <div class="tile"><h4>Support request tracking</h4><p>Ticket number on send; "My requests" with status; reply thread.</p><p class="why">Operational efficiency — fewer duplicate contacts.</p></div>
+  <div class="tile"><h4>Easier account linking</h4><p>Card scan / plate + OTP; "where to find your account number" help.</p><p class="why">Retention — fixes the first-session drop-off.</p></div>
+  <div class="tile"><h4>Biometric sign-in &amp; PIN</h4><p>Face ID / fingerprint for return visits; PIN for reload confirmation.</p><p class="why">Satisfaction (speed), trust (security).</p></div>
+  <div class="tile"><h4>Household / fleet view <span class="pill strat">Strategic</span></h4><p>Aliases, shared reload, per-vehicle spend summary, monthly total.</p><p class="why">Retention for multi-vehicle customers; foundation for corporate accounts.</p></div>
+  <div class="tile"><h4>Filipino language &amp; Dynamic Type</h4><p>Localisation toggle; support for large text sizes.</p><p class="why">Satisfaction, accessibility across a 1M+ base.</p></div>
+  <div class="tile"><h4>Interoperability info <span class="pill strat">Strategic</span></h4><p>Where Autosweep works, and status of Easytrip interoperability — the T&amp;C already references it.</p><p class="why">Trust — answers a top FAQ before it becomes a call.</p></div>
+</div>
+<div class="assume"><b>Assumption.</b> Feature gaps are relative to the captured screens. Login/registration, the post-payment return and receipt, SOA output and any confirmation dialogs were not captured and may partially cover some items above.</div>
+
+<!-- ============================================================ -->
+<h2 id="quick">Quick wins</h2>
+<p>Ship-in-a-sprint changes with no backend dependency, ordered by impact.</p>
+<ol>
+  <li><strong>Show balance on the Home card</strong> with a Low/OK chip and a "Reload" button (F1). If the balance endpoint is already called for the Account screen, this is a layout change.</li>
+  <li><strong>Remove or replace the disabled Toll Calculator tab</strong> (F3).</li>
+  <li><strong>Suppress the website consent modal inside the Traffic webview</strong> and pin it to the map route; add a branded loading state (F2 short-term, F17).</li>
+  <li><strong>Demote Delete Account</strong> to a text action inside a "Manage account" sheet with an explicit confirmation (F6).</li>
+  <li><strong>Empty states</strong> for Announcement and any list; branded skeletons (F7, F17).</li>
+  <li><strong>Fix the greeting binding</strong> and fall back gracefully (F9).</li>
+  <li><strong>Add "Where do I find this?"</strong> help and an example card image on Add Account (F11).</li>
+  <li><strong>Date presets + native pickers</strong> on Statement; explain the range cap (F13).</li>
+  <li><strong>Visible hotline numbers with hours and Copy</strong>; pre-select the only account; plain-language concern labels with helper text; ghost Cancel (F10 partial, F15).</li>
+  <li><strong>Design-system hygiene:</strong> solid inputs, green focus, caption contrast, label consistency, typo fixes, icon differentiation, safe-area fix (F14, F20, F22–F24).</li>
+  <li><strong>Show the convenience fee before the summary</strong> — on the method picker and as a live total beside the amount field (F28).</li>
+  <li><strong>Add a "Pay with this card" action and demote delete</strong> on the Credit Card screen; add a "Secured by Xendit" line and prefill email/mobile on Add Card (F29).</li>
+  <li><strong>Interstitial before bank login</strong> ("You'll sign in on BPI's secure page…") and disable Back during the session — a stopgap until the external-browser change ships (F27).</li>
+  <li><strong>Hide the blank QR path on-device</strong> and add a loading skeleton to the GCash handoff (F30).</li>
+  <li><strong>Payment copy:</strong> logos on the method picker; one descriptor per provider; fix "GCASH" (F18); shrink the summary illustration (F32).</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="long">Longer-term opportunities</h2>
+<div class="grid2">
+  <div class="tile"><h4>Activity-centred information architecture</h4><p>Home · Activity · Traffic · Help · Menu, with Activity as the trust surface and Home as the action surface. Requires a transactions API with plaza-level detail and acceptable latency.</p></div>
+  <div class="tile"><h4>Proactive balance management</h4><p>Thresholds, alerts, auto-reload, "enough for your usual route" estimates from trip history. Requires saved payment methods and a notification service.</p></div>
+  <div class="tile"><h4>Native traffic &amp; advisories</h4><p>Consume the feed behind the current web map; add plaza-level status and push advisories. Turns a broken tab into a daily habit.</p></div>
+  <div class="tile"><h4>Self-service account lifecycle</h4><p>Sticker replacement requests, plate changes, mobile-number updates, vehicle details — each currently a support ticket category — as in-app flows with status tracking.</p></div>
+  <div class="tile"><h4>Fleet &amp; household accounts</h4><p>Shared wallets, per-vehicle limits, monthly statements, corporate installation requests — the "Corporate Account Installation" concern suggests latent demand.</p></div>
+  <div class="tile"><h4>Interoperability readiness</h4><p>If Autosweep–Easytrip interoperability expands, the app needs a unified balance/route story. Designing Activity and Reload with multi-operator rows in mind avoids a rebuild.</p></div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="research">Questions requiring user research or product validation</h2>
+<h3>Behavioural (analytics)</h3>
+<ul>
+  <li>What share of sessions end after viewing balance? How many taps precede the first reload?</li>
+  <li>Tap rate on the disabled Toll Calculator tab and on Traffic Updates; bounce rate from the consent modal.</li>
+  <li>Reload funnel per channel: method → amount → provider → summary → auth → return → credited. Where do users drop — and does abandonment spike at the fee reveal (R4/R9) or at the bank login (R6/R7)?</li>
+  <li>Distribution of reload amounts; how many are ≤ ₱300, where the ₱13 fee is ≥ 4%?</li>
+  <li>SOA generation volume and the distribution of ranges chosen.</li>
+</ul>
+<h3>Attitudinal (interviews, 8–12 customers across single-vehicle, multi-vehicle, fleet)</h3>
+<ul>
+  <li>When and where do people check their balance? (in-car, before leaving, at the plaza?)</li>
+  <li>How do they currently verify a charge? Do they trust the SOA?</li>
+  <li>What happened the last time a sticker didn't read or a load didn't credit — what did they do, and how long did resolution take?</li>
+  <li>Which support categories do customers recognise, and what do they call those problems in their own words?</li>
+</ul>
+<h3>Product / operational</h3>
+<ul>
+  <li>Why is Toll Calculator disabled, and is a static fare matrix acceptable?</li>
+  <li>Does a machine-readable feed exist behind the SMC traffic map?</li>
+  <li>What does "Delete Account" actually do — unlink from the app, or close the RFID account?</li>
+  <li>What does the generated SOA look like and how is it delivered?</li>
+  <li>Fee schedule: is ₱13 flat, per-channel, or tiered? Who sets it (Xendit, the operator)? Are there fee-free channels?</li>
+  <li>Is the Add Credit Card form a Xendit-hosted tokenisation component or the app's own form? (Determines PCI scope and how much can be restyled.)</li>
+  <li>Does Xendit's Direct Debit integration support external-browser or bank-app authentication instead of an in-app webview?</li>
+  <li>Is the blank QR on the GCash handoff a rendering failure or a slow load?</li>
+  <li>Latency from plaza transaction to backend availability; feasibility of push on credit.</li>
+  <li>Which profile fields can be self-edited under KYC/data-privacy policy? Is plate + OTP lookup permissible?</li>
+  <li>Is the "AUTOSWEEP TO GO" name a data issue or a placeholder in the tester's profile?</li>
+  <li>Minimum balance and load limits per tollway (needed for the status chip and reload presets).</li>
+</ul>
+<h3>Not observable from the screens (needs capture)</h3>
+<ul>
+  <li>Login, registration, forgot password, OTP.</li>
+  <li>The post-payment return leg for each channel: success, failure, timeout, receipt, and the balance update on Home.</li>
+  <li>Credit-card payment past the saved-card list (R1) — the tap target and any 3-D Secure step.</li>
+  <li>Confirmation dialogs for Delete Account and Update Alias.</li>
+  <li>Offline / error states; Android parity.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="next">Suggested next steps for the case study</h2>
+<ol>
+  <li><strong>Complete the evidence set.</strong> Capture login/registration, the post-payment return and receipt for at least one bank and one wallet, the SOA output, Delete/Alias confirmations, and an airplane-mode session. Re-run this audit's open items against them.</li>
+  <li><strong>Triangulate.</strong> Pull the last 90 days of App Store / Play Store reviews and, if accessible, support-ticket volume by the app's own concern categories. Map each to a finding above; this converts a heuristic audit into an evidence-backed one.</li>
+  <li><strong>Run 5 quick usability sessions</strong> on the current build with the three top tasks (check balance, reload ₱500, find last week's charges). Time-on-task and error counts give you a baseline to beat.</li>
+  <li><strong>Define the redesign's north-star metrics:</strong> taps-to-balance (target 0), reload completion rate, share of "Incorrect Charging" and "Uncredited Load" tickets deflected, Traffic tab engagement.</li>
+  <li><strong>Design the five moves</strong> in <a href="#solutions">Recommended design solutions</a> as a connected prototype (Home → Activity → Reload → Help), not isolated screens.</li>
+  <li><strong>Test the prototype</strong> with the same tasks and participants; report before/after.</li>
+  <li><strong>Frame the write-up</strong> around the trust narrative: a prepaid toll app succeeds when the customer never has to wonder <em>how much do I have, what was I charged, and did my money arrive</em>. Every design decision should trace back to one of those three questions.</li>
+</ol>
+
+<footer>
+  Heuristic audit based on 41 captured screens of Autosweep RFID iOS v4.0.0.1 (September 2026). Findings not directly observed are labelled as assumptions. Autosweep and SMC Tollways are trademarks of their respective owners; this document is an independent design case study.
+</footer>
+</div>
