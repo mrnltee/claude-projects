@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[user]
+	email = mbtusoy@gmail.com
+	name = merneltusoy
+[remote "origin"]
+	url = https://github.com/mrnltee/maybahaba.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
